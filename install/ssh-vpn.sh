@@ -1,6 +1,6 @@
 #!/bin/bash
 # Script Mod updated By Prince
-# 
+#
 # ==================================================
 
 GitUser="syapik96"
@@ -8,9 +8,9 @@ GitUser="syapik96"
 
 # initializing var
 export DEBIAN_FRONTEND=noninteractive
-MYIP=$(wget -qO- icanhazip.com);
-MYIP2="s/xxxxxxxxx/$MYIP/g";
-NET=$(ip -o $ANU -4 route show to default | awk '{print $5}');
+MYIP=$(wget -qO- icanhazip.com)
+MYIP2="s/xxxxxxxxx/$MYIP/g"
+NET=$(ip -o $ANU -4 route show to default | awk '{print $5}')
 source /etc/os-release
 ver=$VERSION_ID
 
@@ -42,15 +42,15 @@ apt-get install iptables-persistent
 
 # check package install if missing
 sudo apt-get ssl-cert bind9-utils install bzip2 gzip coreutils wget screen rsyslog iftop htop -y
-sudo apt-get install -y net-tools zip unzip wget net-tools curl nano sed screen gnupg gnupg1 
+sudo apt-get install -y net-tools zip unzip wget net-tools curl nano sed screen gnupg gnupg1
 sudo apt-get install -y bc apt-transport-https build-essential dirmngr libxml-parser-perl neofetch git
-apt-get install -y --fix-missing 
+apt-get install -y --fix-missing
 
 # go to root
 cd
 # Edit file /etc/systemd/system/rc-local.service
 
-cat > "/etc/systemd/system/rc-local.service" <<EOF
+cat >"/etc/systemd/system/rc-local.service" <<EOF
 [Unit]
 Description=/etc/rc.local
 ConditionPathExists=/etc/rc.local
@@ -69,7 +69,7 @@ EOF
 
 # nano /etc/rc.local
 
-cat > "/etc/rc.local" <<EOF
+cat >"/etc/rc.local" <<EOF
 #!/bin/sh -e
 # rc.local
 # By default this script does nothing.
@@ -83,7 +83,7 @@ systemctl enable rc-local
 systemctl start rc-local.service
 
 # disable ipv6
-echo 1 > /proc/sys/net/ipv6/conf/all/disable_ipv6
+echo 1 >/proc/sys/net/ipv6/conf/all/disable_ipv6
 sed -i '$ i\echo 1 > /proc/sys/net/ipv6/conf/all/disable_ipv6' /etc/rc.local
 
 # set time GMT +8
@@ -95,14 +95,12 @@ apt-get install gnupg gnupg1 gnupg2 -y
 wget http://www.webmin.com/jcameron-key.asc
 apt-key add jcameron-key.asc
 
-
 # set locale
 sed -i 's/AcceptEnv/#AcceptEnv/g' /etc/ssh/sshd_config
 
 # set ./bash.rc
-echo "clear" >> .profile
-echo "prince" >> .profile
-
+echo "clear" >>.profile
+echo "prince" >>.profile
 
 # install webserver
 apt -y install nginx
@@ -112,7 +110,7 @@ cd
 wget -O /etc/nginx/nginx.conf "https://raw.githubusercontent.com/syapik96/aws/main/nginx.conf"
 
 Index_port='81'
-IPADDR=$(wget -qO- icanhazip.com);
+IPADDR=$(wget -qO- icanhazip.com)
 # creating page download Openvpn config file
 mkdir -p /home/vps/public_html
 wget -O /home/vps/public_html/index.html "https://raw.githubusercontent.com/syapik96/aws/main/lain2/index.html"
@@ -130,14 +128,13 @@ cd
 sed -i 's/Port 22/Port 22/g' /etc/ssh/sshd_config
 sed -i '/Port 40000/g' /etc/ssh/sshd_config
 
-
 # install dropbear
 apt-get install dropbear -y
 sed -i 's/NO_START=1/NO_START=0/g' /etc/default/dropbear
 sed -i 's/DROPBEAR_PORT=22/DROPBEAR_PORT=143/g' /etc/default/dropbear
 sed -i 's/DROPBEAR_EXTRA_ARGS=/DROPBEAR_EXTRA_ARGS="-p 50000 -p 109 -p 69"/g' /etc/default/dropbear
-echo "/bin/false" >> /etc/shells
-echo "/usr/sbin/nologin" >> /etc/shells
+echo "/bin/false" >>/etc/shells
+echo "/usr/sbin/nologin" >>/etc/shells
 service ssh restart
 service dropbear restart
 
@@ -145,41 +142,40 @@ service dropbear restart
 apt -y install squid3
 wget -O /etc/squid/squid.conf "https://raw.githubusercontent.com/${GitUser}/aws/main/squid3.conf"
 sed -i $MYIP2 /etc/squid/squid.conf
+# Install SSLH
+apt -y install sslh
+rm -f /etc/default/sslh
 
-#​ Install SSLH 
-apt -y install sslh 
-​rm -f /etc/default/sslh 
-  
-​#​ Settings SSLH
+# Settings SSLH
 
-​cat ​>​ "/etc/default/sslh" ​<<​-EOF12
-​# Default options for sslh initscript 
-​# sourced by /etc/init.d/sslh 
-  
-​# Disabled by default, to force yourself 
-# to read the configuration: 
-# - /usr/share/doc/sslh/README.Debian (quick start) 
-​# - /usr/share/doc/sslh/README, at "Configuration" section 
-​# - sslh(8) via "man sslh" for more configuration details. 
-# Once configuration ready, you *must* set RUN to yes here 
-# and try to start sslh (standalone mode only) 
- 
-RUN=yes 
+cat >"/etc/default/sslh" <<EOF
+# Default options for sslh initscript
+# sourced by /etc/init.d/sslh
 
-# binary to use: forked (sslh) or single-thread (sslh-select) version 
-​# systemd users: dont forget to modify /lib/systemd/system/sslh.service 
-​DAEMON=/usr/sbin/sslh 
+# Disabled by default, to force yourself
+# to read the configuration:
+# - /usr/share/doc/sslh/README.Debian (quick start)
+# - /usr/share/doc/sslh/README, at "Configuration" section
+# - sslh(8) via "man sslh" for more configuration details.
+# Once configuration ready, you *must* set RUN to yes here
+# and try to start sslh (standalone mode only)
 
-DAEMON_OPTS="--user sslh --listen 0.0.0.0:443 --ssl 127.0.0.1:777 --ssh 127.0.0.1:109 --openvpn 127.0.0.1:1194 --http 127.0.0.1:8880 --pidfile /var/run/sslh/sslh.pid -n"
+RUN=yes
 
-EOF12
-  
-​#​ Restart Service SSLH 
-service sslh restart 
-systemctl restart sslh 
-/etc/init.d/sslh restart 
-​/etc/init.d/sslh status 
-​/etc/init.d/sslh restart
+# binary to use: forked (sslh) or single-thread (sslh-select) version
+# systemd users: dont forget to modify /lib/systemd/system/sslh.service
+DAEMON=/usr/sbin/sslh
+
+DAEMON_OPTS="--user sslh --listen 0.0.0.0:443 --ssl 127.0.0.1:777 --ssh 127.0.0.1:109 --openvpn 127.0.0.1:1194 --http 127.0.0.1:8880 --pidfile /var/run/sslh/sslh.pid -n"
+
+EOF
+
+# Restart Service SSLH
+service sslh restart
+systemctl restart sslh
+/etc/init.d/sslh restart
+/etc/init.d/sslh status
+/etc/init.d/sslh restart
 
 # setting vnstat
 apt-get -y install vnstat
@@ -207,8 +203,8 @@ sed -i 's/ssl=1/ssl=0/g' /etc/webmin/miniserv.conf
 apt-get install stunnel4 -y
 ## choose which one work on your vps, [ if u got some issue ]
 ## after configur or make change stunnel.conf
-## and if this three not isn't fixed your pid file issue 
-### so u need to locat your pid it been saved 
+## and if this three not isn't fixed your pid file issue
+### so u need to locat your pid it been saved
 ## not find ,, configur your stunnel.conf until work
 ## /*/*/stunnel4.pid or /*/*/stunnel.pid
 # if use default setup, 1 from this 3 may solve your issue
@@ -216,7 +212,7 @@ apt-get install stunnel4 -y
 # pid = /var/run/stunnel.pid
 # pid = /var/run/stunnel4.pid
 
-cat > /etc/stunnel/stunnel.conf <<EOF
+cat >/etc/stunnel/stunnel.conf <<EOF
 cert = /etc/stunnel/stunnel.pem
 client = no
 socket = a:SO_REUSEADDR=1
@@ -243,8 +239,8 @@ EOF
 # make a certificate
 openssl genrsa -out key.pem 2048
 openssl req -new -x509 -key key.pem -out cert.pem -days 1095 \
--subj "/C=$country/ST=$state/L=$locality/O=$organization/OU=$organizationalunit/CN=$commonname/emailAddress=$email"
-cat key.pem cert.pem >> /etc/stunnel/stunnel.pem
+  -subj "/C=$country/ST=$state/L=$locality/O=$organization/OU=$organizationalunit/CN=$commonname/emailAddress=$email"
+cat key.pem cert.pem >>/etc/stunnel/stunnel.pem
 
 # konfigurasi stunnel
 sed -i 's/ENABLED=0/ENABLED=1/g' /etc/default/stunnel4
@@ -292,14 +288,19 @@ apt -y install fail2ban
 
 # Instal DDOS Flate
 if [ -d '/usr/local/ddos' ]; then
-	echo; echo; echo -e "Please un-install the previous version first"
-	exit 0
+  echo
+  echo
+  echo -e "Please un-install the previous version first"
+  exit 0
 else
-	mkdir /usr/local/ddos
+  mkdir /usr/local/ddos
 fi
 clear
-echo; echo 'Installing DOS-Deflate 0.6'; echo
-echo; echo -n 'Downloading source files...'
+echo
+echo 'Installing DOS-Deflate 0.6'
+echo
+echo
+echo -n 'Downloading source files...'
 wget -q -O /usr/local/ddos/ddos.conf http://www.inetbase.com/scripts/ddos/ddos.conf
 echo -n '.'
 wget -q -O /usr/local/ddos/LICENSE http://www.inetbase.com/scripts/ddos/LICENSE
@@ -310,10 +311,12 @@ wget -q -O /usr/local/ddos/ddos.sh http://www.inetbase.com/scripts/ddos/ddos.sh
 chmod 0755 /usr/local/ddos/ddos.sh
 cp -s /usr/local/ddos/ddos.sh /usr/local/sbin/ddos
 echo '...done'
-echo; echo -n 'Creating cron to run script every minute.....(Default setting)'
-/usr/local/ddos/ddos.sh --cron > /dev/null 2>&1
+echo
+echo -n 'Creating cron to run script every minute.....(Default setting)'
+/usr/local/ddos/ddos.sh --cron >/dev/null 2>&1
 echo '.....done'
-echo; echo 'Installation has completed.'
+echo
+echo 'Installation has completed.'
 echo 'Config file is at /usr/local/ddos/ddos.conf'
 echo 'Please send in your comments and/or suggestions to zaf@vsnl.com'
 
@@ -342,8 +345,8 @@ iptables -A FORWARD -m string --algo bm --string "announce.php?passkey=" -j DROP
 iptables -A FORWARD -m string --algo bm --string "torrent" -j DROP
 iptables -A FORWARD -m string --algo bm --string "announce" -j DROP
 iptables -A FORWARD -m string --algo bm --string "info_hash" -j DROP
-iptables-save > /etc/iptables.up.rules
-iptables-restore -t < /etc/iptables.up.rules
+iptables-save >/etc/iptables.up.rules
+iptables-restore -t </etc/iptables.up.rules
 netfilter-persistent save
 netfilter-persistent reload
 
@@ -373,18 +376,18 @@ wget -O ceklim "https://raw.githubusercontent.com/${GitUser}/aws/main/ceklim.sh"
 wget -O tendang "https://raw.githubusercontent.com/${GitUser}/aws/main/tendang.sh" && chmod +x tendang
 wget -O clear-log "https://raw.githubusercontent.com/${GitUser}/aws/main/clear-log.sh" && chmod +x clear-log
 
-echo "0 5 * * * root clear-log && reboot" >> /etc/crontab
+echo "0 5 * * * root clear-log && reboot" >>/etc/crontab
 
 # remove unnecessary files
 apt-get clean
 apt-get autoremove
 apt -y autoclean
-apt -y  --purge remove unscd;
-apt-get -y --purge remove samba*;
-apt-get -y --purge remove apache2*;
-apt-get -y --purge remove bind9*;
-apt-get -y remove sendmail*;
-apt -y autoremove;
+apt -y --purge remove unscd
+apt-get -y --purge remove samba*
+apt-get -y --purge remove apache2*
+apt-get -y --purge remove bind9*
+apt-get -y remove sendmail*
+apt -y autoremove
 
 # finishing
 cd
@@ -406,14 +409,14 @@ screen -dmS badvpn badvpn-udpgw --listen-addr 127.0.0.1:7400 --max-clients 500
 screen -dmS badvpn badvpn-udpgw --listen-addr 127.0.0.1:7500 --max-clients 500
 
 history -c
-echo "unset HISTFILE" >> /etc/profile
+echo "unset HISTFILE" >>/etc/profile
 
 cd
 rm /root/master.zip
 rm -f /root/ssh-vpn.sh
 mkdir /root/folderCert
 mv /root/cert.pem /root/folderCert/cert.pem
-mv /root/key.pem /root/folderCert/key.pem 
+mv /root/key.pem /root/folderCert/key.pem
 
 # finihsing
 prince
